@@ -1,17 +1,15 @@
 <?php
 include 'FontGroupController.php';
 include 'fontController.php';
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload Dropbox UI using Bootstrap</title>
-
+    <title>Full Stack Developer Assignment of Sozib Hossen</title>
+    <link rel="icon" type="image/png" href="//zeptoapps.com/cdn/shop/files/favicon.png?crop=center&height=32&v=1659419493&width=32">
     <!-- Bootstrap 5 stylesheet -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css" integrity="sha512-Ez0cGzNzHR1tYAv56860NLspgUGuQw16GiOOp/I2LuTmpSK9xDXlgJz3XN4cnpXWDmkNBKXR/VDMTCnAaEooxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- FontAwesome 6 stylesheet -->
@@ -132,11 +130,11 @@ include 'fontController.php';
                     </div>
                     <div class="col-md-3">
                         <label for="fontName" class="form-label">Font Name</label>
-                        <input type="text" class="form-control" id="fontName" name="font_name" placeholder="Font Name" required>
+                        <input type="text" class="form-control" id="fontName" name="font_name[]" placeholder="Font Name" required>
                     </div>
                     <div class="col-md-3">
                         <label for="fontSelect" class="form-label">Select Font</label>
-                        <select id="fontsSelect" class="form-select" name="fonts[]">
+                        <select id="fontsSelect" class="fontSelect form-select" name="fonts[]">
                             <option value="">Select Font</option>
                             <?php foreach ($fonts as $font): ?>
                                 <option value="<?php echo htmlspecialchars($font['id']); ?>">
@@ -147,11 +145,11 @@ include 'fontController.php';
                     </div>
                     <div class="col-md-3">
                         <label for="specificSize" class="form-label">Specific Size</label>
-                        <input type="number" class="form-control" id="specificSize" name="specific_size" placeholder="Specific Size" step="0.1" min="0">
+                        <input type="number" class="form-control" id="specificSize" name="specific_size[]" placeholder="Specific Size" step="0.1" min="0">
                     </div>
                     <div class="col-md-3">
                         <label for="priceChange" class="form-label">Price Change</label>
-                        <input type="number" class="form-control" id="priceChange" name="price_change" placeholder="Price Change" step="0.01" min="0">
+                        <input type="number" class="form-control" id="priceChange" name="price_change[]" placeholder="Price Change" step="0.01" min="0">
                     </div>
                     <i class="fa-solid fa-xmark remove-row" style="cursor: pointer; color: red; display: none;"></i>
                 </div>
@@ -179,8 +177,8 @@ include 'fontController.php';
                 echo '<td>' . htmlspecialchars($group['fonts']) . '</td>';
                 echo '<td>' . htmlspecialchars($group['font_count']) . '</td>';
                 echo '<td>';
-                echo '<button class="btn btn-primary btn-sm edit-group" data-id="' . htmlspecialchars($group['id']) . '">Edit</button> ';
-                echo '<a href="deleteFontGroup.php?id=' . $group['id'] . '" class="btn btn-danger btn-sm">Delete</a>';
+                echo '<button class="btn btn-primary btn-sm edit-group" data-id="' . htmlspecialchars($group['id']) . '">Edit</button> | ';
+                echo '<button class="btn btn-danger btn-sm delete-group" data-id="' . htmlspecialchars($group['id']) . '">Delete</button>';
                 echo '</td>';
                 echo '</tr>';
             }
@@ -210,8 +208,8 @@ include 'fontController.php';
                         <div id="editFontRows">
                             <!-- Existing rows will be dynamically loaded here -->
                         </div>
-                        <button type="button" id="addEditRow" class="btn btn-primary mt-3">Add Row</button>
-                        <button type="submit" class="btn btn-success mt-3">Update Group</button>
+                        <button onclick="addRowForEdit()" type="button" id="addEditRow" class="btn btn-primary mt-3">Add Row</button>
+                        <button type="button" onclick="updateData(event)" class="btn btn-success mt-3">Update Group</button>
                     </form>
                 </div>
             </div>
@@ -224,9 +222,10 @@ include 'fontController.php';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+var GBL_FONTS = {};
+var fonts = <?php echo json_encode($fonts); ?>;
 $(document).ready(function() {
     var dropzone = $('#dropzone');
-
     // Prevent default drag behaviors
     $(document).on('dragover dragenter', function(e) {
         e.preventDefault();
@@ -279,7 +278,8 @@ $(document).ready(function() {
                 var result = JSON.parse(response);                
                 updateFontsTable(result);
                 updateFontDropdown(result[0].fonts);
-                addNewRow(result[0].fonts);
+                GBL_FONTS = result[0].fonts;
+                //addNewRow(result[0].fonts);
                 alert('Files uploaded successfully!');
             },
             error: function() {
@@ -288,14 +288,24 @@ $(document).ready(function() {
         });
     }
     function updateFontDropdown(fonts) {
-        
-        console.log(fonts);
-        var select = $('#fontsSelect'); // Use the ID of the select element
-        select.empty(); // Clear existing options
-        select.append('<option value="">Select Font</option>'); // Default option
+        // console.log(fonts);
+        // var select = $('#fontsSelect'); // Use the ID of the select element
+        // select.empty(); // Clear existing options
+        // select.append('<option value="">Select Font</option>'); // Default option
 
-        $.each(fonts, function(index, font) {
-            select.append(`<option value="${font.id}">${font.name}</option>`);
+        // $.each(fonts, function(index, font) {
+        //     select.append(`<option value="${font.id}">${font.name}</option>`);
+        // });
+
+        var allSelects = $('.fontSelect'); // Select all elements with the class 'fontSelect' using jQuery
+        allSelects.each(function() {
+            var select = $(this); // Convert each select element to a jQuery object
+            select.empty(); // Clear existing options
+            select.append('<option value="">Select Font</option>'); // Default option
+
+            $.each(fonts, function(index, font) {
+                select.append(`<option value="${font.id}">${font.name}</option>`);
+            });
         });
     }
 
@@ -340,8 +350,12 @@ $(document).ready(function() {
             data: { delete_id: fontId },
             success: function(response) {
                 var result = JSON.parse(response);
+                console.log(result);
                 if (result.status === "success") {
                     button.closest('tr').remove();
+                    // updateFontsTable(result);
+                    updateFontDropdown(result.fonts);
+                    GBL_FONTS = result.fonts;
                     alert('Font deleted successfully!');
                 } else {
                     alert('Failed to delete font.');
@@ -400,7 +414,7 @@ $(document).ready(function() {
 
         // Add new row logic
         $('#addRow').on('click', function() {
-            var newRow = `
+             var newRow = `
                 <div class="row font-row mb-3">
                      <div class="col-md-3">
                         <label for="fontName" class="form-label">Font Name</label>
@@ -408,14 +422,21 @@ $(document).ready(function() {
                     </div>
                     <div class="col-md-3">
                         <label for="fontSelect" class="form-label">Select Font</label>
-                        <select id="fontsSelect" class="form-select" name="fonts[]">
-                            <option value="">Select Font</option>
-                            <?php foreach ($fonts as $font): ?>
-                                <option value="<?php echo htmlspecialchars($font['id']); ?>">
-                                    <?php echo htmlspecialchars($font['name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <select id="fontsSelect" class="fontSelect form-select" name="fonts[]">
+                            <option value="">Select Font</option>`;
+                            if(GBL_FONTS.length){
+                                $.each(GBL_FONTS, function(index, font) {
+                                    newRow += `<option value="${font.id}">${font.name}</option>`;
+                                });
+                            }else{
+                                <?php foreach ($fonts as $font): ?>
+                                    newRow += `<option value="<?php echo htmlspecialchars($font['id']); ?>">
+                                        <?php echo htmlspecialchars($font['name']); ?>
+                                    </option>`
+                                <?php endforeach; ?>
+                            }
+                           
+                        newRow += `</select>
                     </div>
                     <div class="col-md-3">
                         <label for="specificSize" class="form-label">Specific Size</label>
@@ -428,6 +449,7 @@ $(document).ready(function() {
                     <i class="fa-solid fa-xmark remove-row" style="cursor: pointer; color: red;"></i>
                 </div>
             `;
+           
             $('#fontRows').append(newRow); // Append new row to the form
         });
 
@@ -453,36 +475,31 @@ $('#fontGroupsTable').on('click', '.edit-group', function() {
                 alert(response.error);
                 return;
             }
-
             const group = response;
-
             // Clear existing rows
             $('#editFontRows').empty();
-
             // Populate form fields
             $('#editGroupTitle').val(group.group_title);
-            var selectedFonts = group.fonts;                        
-            // Check if 'fonts' is an array
-            if (Array.isArray(selectedFonts)) {
+            var selectedFonts = group.fonts;
+                // Check if 'fonts' is an array
+                if (Array.isArray(selectedFonts)) {
                     selectedFonts.forEach(function(font) {
-                        
-
+                        // console.log(fonts,font);
                         // Create the font row HTML
                         const fontRow = `
                             <div class="row font-row mb-3">
                                 <div class="col-md-3">
                                     <label class="form-label">Font Name</label>
-                                    <input type="text" class="form-control" name="font_name[]" value="${font.name}" required>
+                                    <input type="text" class="form-control" name="font_name[]" value="${font.font_name}" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Select Font</label>
                                     <select id="fontSelect" class="form-control" name="fonts[]">
-                                        <?php foreach ($fonts as $font): ?>
-                                            <option value="<?php echo htmlspecialchars($font['id']); ?>">
-                                                <?php echo htmlspecialchars($font['name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                        ${GBL_FONTS.length ? 
+                                            GBL_FONTS.map(fontData => `<option value="${fontData.id}" ${fontData.id == font.id ? 'selected' : ''}>${fontData.name}</option>`).join('') :
+                                            fonts.map(f => `<option value="${f.id}" ${f.id == font.id ? 'selected' : ''}>${f.name}</option>`).join('')}
                                     </select>
+
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Specific Size</label>
@@ -495,13 +512,13 @@ $('#fontGroupsTable').on('click', '.edit-group', function() {
                                 <i class="fa-solid fa-xmark remove-row" style="cursor: pointer; color: red;"></i>
                             </div>
                         `;
-                        
                         // Append the row
                         $('#editFontRows').append(fontRow);
                     });
                 } else {
                     console.error('Fonts data is not an array:', group.fonts);
                 }
+
 
             // Show the modal
             const modal = new bootstrap.Modal(document.getElementById('editFontGroupModal'));
@@ -512,8 +529,42 @@ $('#fontGroupsTable').on('click', '.edit-group', function() {
         }
     });
 
-    // Add row to the edit form
-    $('#addEditRow').click(function() {
+    // Remove row from the edit form
+    $('#editFontRows').on('click', '.remove-row', function() {
+        $(this).closest('.font-row').remove();
+    });
+
+
+});
+
+function updateData(e){
+        // Handle form submission for editing
+        // $('#editFontGroupForm').submit(function(e) {
+        e.preventDefault();        
+        const formData = $('#editFontGroupForm').serialize() + '&action=update';        
+        // console.log(formData);
+        $.ajax({
+            url: 'FontGroupController.php',
+            method: 'POST',
+            data: formData,
+            success: function(response) {                             
+                const result = JSON.parse(response);
+                if (result.success) {
+                    alert(result.success);
+                    $('#editFontGroupModal').modal('hide');
+                    $('#fontGroupsTable tbody').html(result.html);                   
+                } else {
+                    alert('Update failed: ' + result.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+    // });
+}
+
+function addRowForEdit(){
         const newRow = `
             <div class="row font-row mb-3">               
                 <div class="col-md-3">
@@ -523,12 +574,10 @@ $('#fontGroupsTable').on('click', '.edit-group', function() {
                 <div class="col-md-3">
                     <label class="form-label">Select Font</label>
                     <select class="form-select" name="fonts[]">
-                        <option value="">Select Font</option>
-                        <?php foreach ($fonts as $font): ?>
-                            <option value="<?php echo htmlspecialchars($font['id']); ?>">
-                                <?php echo htmlspecialchars($font['name']); ?>
-                            </option>
-                        <?php endforeach; ?>
+                    <option value="">Select Font</option>
+                        ${GBL_FONTS.length ? 
+                            GBL_FONTS.map(fontData => `<option value="${fontData.id}">${fontData.name}</option>`).join('') :
+                            fonts.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -543,59 +592,39 @@ $('#fontGroupsTable').on('click', '.edit-group', function() {
             </div>
         `;
         $('#editFontRows').append(newRow);
+    }
 
-        // Populate font select options for new row
+
+
+// Handle the delete button click event
+$('#fontGroupsTable').on('click', '.delete-group', function() {
+    const groupId = $(this).data('id');  // Get the group ID
+    if (confirm('Are you sure you want to delete this font group?')) {
         $.ajax({
-            url: 'FontOptionsController.php', // Replace with your PHP file that returns font options
-            method: 'GET',
-            dataType: 'json',
-            success: function(fonts) {
-                const select = $('#editFontRows .font-row').last().find('select[name="fonts[]"]');
-                fonts.forEach(function(fontOption) {
-                    const option = `<option value="${fontOption.id}">${fontOption.name}</option>`;
-                    select.append(option);
-                });
+            url: 'FontGroupController.php',  // Update with your actual controller path
+            method: 'POST',  // Use POST since we're modifying data (deletion)
+            data: {
+                action: 'delete',  // Pass the action as delete
+                id: groupId        // Pass the group ID to delete
+            },
+            success: function(response) { 
+                var result = response;
+                if (result.success) {
+                    // Update the HTML content of the table with the new data
+                    $('#fontGroupsTable tbody').html(result.html); // Adjust the selector as needed                    
+                    alert(result.success);
+                } else {
+                    alert('Failed to delete font group: ' + result.error);
+                }
             },
             error: function(xhr, status, error) {
                 console.error('AJAX Error: ', status, error);
             }
         });
-    });
-
-    // Remove row from the edit form
-    $('#editFontRows').on('click', '.remove-row', function() {
-        $(this).closest('.font-row').remove();
-    });
-
-    // Handle form submission for editing
-    $('#editFontGroupForm').submit(function(e) {
-        e.preventDefault();
-        
-        const formData = $(this).serialize() + '&action=update';
-        
-        // console.log(formData);
-        $.ajax({
-            url: 'FontGroupController.php',
-            method: 'POST',
-            data: formData,
-            success: function(response) {
-                console.log(response);
-                return;
-                const result = JSON.parse(response);
-                if (result.success) {
-                    alert(result.success);
-                    $('#editFontGroupModal').modal('hide');
-                    location.reload(); // Reload the page to show updated data
-                } else {
-                    alert('Update failed: ' + result.error);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('An error occurred: ' + error);
-            }
-        });
-    });
+    }
 });
+
+
 </script>
 
 </html>

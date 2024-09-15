@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 17, 2024 at 06:19 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: localhost:3306
+-- Generation Time: Sep 15, 2024 at 11:57 AM
+-- Server version: 8.0.30
+-- PHP Version: 8.2.19
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,116 +18,96 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `game`
+-- Database: `zepto`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `games`
+-- Table structure for table `fonts`
 --
 
-CREATE TABLE `games` (
-  `id` int(11) NOT NULL,
-  `game_name` varchar(255) NOT NULL,
-  `game_type` varchar(255) NOT NULL,
-  `board_number` int(11) NOT NULL,
-  `max_players` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `fonts` (
+  `id` int NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `uploaded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `games`
+-- Dumping data for table `fonts`
 --
 
-INSERT INTO `games` (`id`, `game_name`, `game_type`, `board_number`, `max_players`) VALUES
-(1, 'Anastasia Hendricks', 'Officia quo voluptat', 337, 4),
-(2, 'Xena Key', 'Natus ex vitae excep', 822, 46),
-(3, 'Macon Hopkins', 'Ut corrupti dolor i', 430, 85),
-(4, 'Kirestin Allison', 'Reiciendis commodo a', 82, 20),
-(5, 'Sigourney Bernard', 'Do at maxime eiusmod', 376, 6),
-(6, 'Lana Carson', 'Eum laborum omnis ex', 741, 19),
-(7, 'Larissa Walton', 'Quos impedit distin', 746, 61),
-(8, 'Xena Moses', 'Enim illum culpa au', 447, 80),
-(9, 'Vladimir Kramer', 'Hic similique qui vo', 874, 43),
-(10, 'Hasad Odonnell', 'Ut aut fugiat ullam ', 342, 93),
-(11, 'Dai England', 'Sit soluta repellen', 193, 86),
-(12, 'Holmes Silva', 'Quasi magni fugit e', 347, 56),
-(13, 'Thane Hartman', 'Facere dolor saepe n', 811, 98),
-(14, 'Bell Beck', 'Deleniti velit molli', 642, 37),
-(15, 'Marsden Ramsey', 'Necessitatibus est s', 889, 95),
-(16, 'Donna Johns', 'Fugiat officiis aut', 14, 55),
-(17, 'Brian Ross', 'Beatae id delectus ', 856, 79),
-(18, 'TEST GAME', 'No type', 123456, 4);
+INSERT INTO `fonts` (`id`, `name`, `file_name`, `uploaded_at`) VALUES
+(6, 'Freedom-10eM', '66e6cb8c25787.ttf', '2024-09-15 11:57:00'),
+(7, 'ShadeBlue-2OozX', '66e6cb9074e56.ttf', '2024-09-15 11:57:04');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `slots`
+-- Table structure for table `font_groups`
 --
 
-CREATE TABLE `slots` (
-  `id` bigint(20) NOT NULL,
-  `game_id` bigint(20) NOT NULL,
-  `student_id` varchar(255) NOT NULL,
-  `date` date NOT NULL,
-  `time` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `font_groups` (
+  `id` int NOT NULL,
+  `group_title` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `slots`
+-- Dumping data for table `font_groups`
 --
 
-INSERT INTO `slots` (`id`, `game_id`, `student_id`, `date`, `time`, `created_at`) VALUES
-(1, 18, '22333', '0000-00-00', '12am', '2024-01-17 17:16:44'),
-(2, 18, '123255', '0000-00-00', '12am', '2024-01-17 17:17:35'),
-(3, 18, '45415', '0000-00-00', '12am', '2024-01-17 17:17:53'),
-(4, 18, '64646', '0000-00-00', '12am', '2024-01-17 17:18:09');
+INSERT INTO `font_groups` (`id`, `group_title`, `created_at`, `updated_at`) VALUES
+(1, 'Test Gorup', '2024-09-15 11:57:21', '2024-09-15 11:57:21');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `students`
+-- Table structure for table `font_group_fonts`
 --
 
-CREATE TABLE `students` (
-  `id` int(11) NOT NULL,
-  `student_name` varchar(255) NOT NULL,
-  `student_id` varchar(20) NOT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `font_group_fonts` (
+  `id` int NOT NULL,
+  `font_group_id` int NOT NULL,
+  `font_name` varchar(255) DEFAULT NULL,
+  `font_id` int NOT NULL,
+  `specific_size` decimal(5,2) DEFAULT NULL,
+  `price_change` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `students`
+-- Dumping data for table `font_group_fonts`
 --
 
-INSERT INTO `students` (`id`, `student_name`, `student_id`, `created_at`) VALUES
-(1, 'Sajib', '22333', '2024-01-14 14:34:37'),
-(2, 'Craig Lancaster', '123255', '2024-01-14 15:03:15'),
-(3, 'fsffsdf1', '45415', '2024-01-14 15:03:57'),
-(4, 'frwerwe', '64646', '2024-01-17 15:03:05'),
-(5, 'regredwaf', '47799', '2024-01-17 15:03:16');
+INSERT INTO `font_group_fonts` (`id`, `font_group_id`, `font_name`, `font_id`, `specific_size`, `price_change`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Ina Blackburn', 7, 88.00, 730.00, '2024-09-15 11:57:21', '2024-09-15 11:57:21'),
+(2, 1, 'Martena Powers', 6, 79.00, 152.00, '2024-09-15 11:57:21', '2024-09-15 11:57:21'),
+(3, 1, 'Rama Petty', 7, 68.00, 973.00, '2024-09-15 11:57:21', '2024-09-15 11:57:21');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `games`
+-- Indexes for table `fonts`
 --
-ALTER TABLE `games`
+ALTER TABLE `fonts`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `slots`
+-- Indexes for table `font_groups`
 --
-ALTER TABLE `slots`
+ALTER TABLE `font_groups`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `students`
+-- Indexes for table `font_group_fonts`
 --
-ALTER TABLE `students`
+ALTER TABLE `font_group_fonts`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -135,22 +115,22 @@ ALTER TABLE `students`
 --
 
 --
--- AUTO_INCREMENT for table `games`
+-- AUTO_INCREMENT for table `fonts`
 --
-ALTER TABLE `games`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+ALTER TABLE `fonts`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `slots`
+-- AUTO_INCREMENT for table `font_groups`
 --
-ALTER TABLE `slots`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `font_groups`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `students`
+-- AUTO_INCREMENT for table `font_group_fonts`
 --
-ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+ALTER TABLE `font_group_fonts`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

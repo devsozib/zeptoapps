@@ -60,8 +60,8 @@ function logUploadToDb($db, $fileName, $fontName) {
     return $fontId;
 }
 
-// Handle font deletion
 function deleteFont($fontId, $uploadDir, $db) {
+    // Prepare and execute the statement to get the file name
     $stmt = $db->prepare("SELECT file_name FROM fonts WHERE id = ?");
     $stmt->bind_param('i', $fontId);
     $stmt->execute();
@@ -69,18 +69,34 @@ function deleteFont($fontId, $uploadDir, $db) {
     $stmt->fetch();
     $stmt->close();
 
+    // Determine the file path
     $filePath = $uploadDir . $fileName;
 
+    // Try to delete the file
     if (unlink($filePath)) {
+        // Delete the font record from the database
         $stmt = $db->prepare("DELETE FROM fonts WHERE id = ?");
         $stmt->bind_param('i', $fontId);
         $stmt->execute();
         $stmt->close();
-        return ["status" => "success"];
+
+        // Fetch the updated list of fonts
+        $fonts = fetchFonts($db);
+
+        // Return success with updated fonts list
+        return [
+            "status" => "success",
+            "fonts" => $fonts
+        ];
     } else {
-        return ["status" => "error", "message" => "Failed to delete file"];
+        // Return error if file deletion failed
+        return [
+            "status" => "error",
+            "message" => "Failed to delete file"
+        ];
     }
 }
+
 
 // Fetch fonts from the database
 function fetchFonts($db) {
